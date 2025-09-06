@@ -6,10 +6,13 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+
 @Service
 @RequiredArgsConstructor
 public class CheckoutService {
 
+    private final PriceEngine priceEngine;
     private final CatalogService catalogService;
 
     @Getter
@@ -21,7 +24,9 @@ public class CheckoutService {
         }
 
         Item item = catalogService.findByName(name);
-        session.scan(item);
+
+        session.initializeReceipt();
+        settleReceipt(session.getReceipt(), item);
         return session.getReceipt();
     }
 
@@ -31,6 +36,12 @@ public class CheckoutService {
         Receipt receiptToReturn = session.getReceipt();
         session.finalizeSession();
         return receiptToReturn;
+    }
+
+    private void settleReceipt(Receipt receipt, Item item) {
+        receipt.setItemQuantity(item);
+        BigDecimal totalPrice = priceEngine.calculateTotalPrice(receipt.getItems());
+        receipt.setTotalPrice(totalPrice);
     }
 
 }

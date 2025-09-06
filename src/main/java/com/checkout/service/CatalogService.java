@@ -1,6 +1,6 @@
 package com.checkout.service;
 
-import com.checkout.config.OfferConfig;
+import com.checkout.config.CheckoutConfig;
 import com.checkout.domain.Item;
 import com.checkout.exception.ItemNotFoundException;
 import lombok.Getter;
@@ -15,7 +15,7 @@ import java.util.Optional;
 public class CatalogService {
      final List<Item> items;
 
-    public CatalogService(OfferConfig config) {
+    public CatalogService(CheckoutConfig config) {
         this.items = new ArrayList<>(config.getCatalogItems());
     }
 

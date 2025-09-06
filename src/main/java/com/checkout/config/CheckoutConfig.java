@@ -1,5 +1,6 @@
 package com.checkout.config;
 
+import com.checkout.domain.BundleOffer;
 import com.checkout.domain.Item;
 import lombok.Getter;
 import lombok.Setter;
@@ -14,6 +15,7 @@ import java.util.List;
 @Getter
 @Setter
 
-public class OfferConfig {
+public class CheckoutConfig {
     private List<Item> catalogItems = new ArrayList<>();
+    private List<BundleOffer> bundleOffers = new ArrayList<>();
 }
