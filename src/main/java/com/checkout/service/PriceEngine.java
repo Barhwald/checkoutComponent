@@ -2,26 +2,24 @@ package com.checkout.service;
 
 import com.checkout.domain.BundleOffer;
 import com.checkout.domain.Item;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.util.List;
 
 @Component
+@RequiredArgsConstructor
 public class PriceEngine {
 
     private final BundleService bundleService;
 
-    public PriceEngine(BundleService bundleService) {
-        this.bundleService = bundleService;
-    }
-
     public BigDecimal calculateTotalPrice(List<Item> items) {
         BigDecimal total = BigDecimal.ZERO;
         total = calculatePriceWithSpecials(total, items);
-        total = applyBundleDiscount(total, items);
 
-        return total;
+        BigDecimal discount = calculateBundleDiscount(items);
+        return total.subtract(discount);
     }
 
     private BigDecimal calculatePriceWithSpecials(BigDecimal total, List<Item> items) {
@@ -56,18 +54,21 @@ public class PriceEngine {
         return total;
     }
 
-    private BigDecimal applyBundleDiscount(BigDecimal total, List<Item> items) {
+    public BigDecimal calculateBundleDiscount(List<Item> items) {
+        BigDecimal discount = BigDecimal.ZERO;
+
         for (BundleOffer offer : bundleService.getBundleOffers()) {
             Item firstItem = findItemByName(items, offer.getFirstItem());
             Item secondItem = findItemByName(items, offer.getSecondItem());
 
             if (firstItem != null && secondItem != null) {
                 int bundles = Math.min(firstItem.getQuantity(), secondItem.getQuantity());
-                BigDecimal discount = offer.getDiscount().multiply(BigDecimal.valueOf(bundles));
-                total = total.subtract(discount);
+                discount = discount.add(
+                        offer.getDiscount().multiply(BigDecimal.valueOf(bundles))
+                );
             }
         }
-        return total;
+        return discount;
     }
 
     private static Item findItemByName(List<Item> items, String name) {

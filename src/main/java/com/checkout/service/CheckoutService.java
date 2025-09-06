@@ -42,6 +42,7 @@ public class CheckoutService {
         receipt.setItemQuantity(item);
         BigDecimal totalPrice = priceEngine.calculateTotalPrice(receipt.getItems());
         receipt.setTotalPrice(totalPrice);
+        receipt.setBundleDiscount(priceEngine.calculateBundleDiscount(receipt.getItems()));
     }
 
 }

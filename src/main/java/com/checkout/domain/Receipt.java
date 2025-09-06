@@ -17,6 +17,7 @@ public class Receipt {
 
     private List<Item> items = new ArrayList<>();
     private BigDecimal totalPrice;
+    private BigDecimal bundleDiscount;
 
     public void setItemQuantity(Item item) {
         for (Item it : items) {
