@@ -1,48 +1,55 @@
 package com.checkout.service;
 
-import com.checkout.domain.Item;
-import com.checkout.domain.Receipt;
-import lombok.Getter;
+import com.checkout.domain.Checkout;
+import com.checkout.domain.ItemDto;
+import com.checkout.exception.CheckoutNotFoundException;
+import com.checkout.repository.CheckoutRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-
-import java.math.BigDecimal;
 
 @Service
 @RequiredArgsConstructor
 public class CheckoutService {
 
     private final PriceEngine priceEngine;
-    private final CatalogService catalogService;
+    private final CheckoutRepository checkoutRepository;
 
-    @Getter
-    private CheckoutSession session;
+    public Checkout initializeCheckout() {
+        Checkout checkout = new Checkout();
+        checkoutRepository.getCheckouts().put(checkout.getId(), checkout);
+        return checkout;
+    }
 
-    public Receipt scanItem(String name) {
-        if (session == null || !session.isActive()) {
-            session = new CheckoutSession();
+    public Checkout scanItem(String checkoutId, ItemDto itemDto) {
+        Checkout checkout = getActiveCheckout(checkoutId);
+
+        checkout.getItems().merge(itemDto.getId(), itemDto.getQuantity(), Integer::sum);
+
+        calculatePrice(checkout);
+        return checkout;
+    }
+
+    public Checkout finalizeCheckout(String checkoutId) {
+        Checkout checkout = getActiveCheckout(checkoutId);
+
+        checkout.setActive(false);
+        return checkout;
+    }
+
+    private Checkout getActiveCheckout(String checkoutId) {
+        Checkout checkout = checkoutRepository.findById(checkoutId)
+                .orElseThrow(() -> new CheckoutNotFoundException("Checkout not found: " + checkoutId));
+
+        if (!checkout.isActive()) {
+            throw new IllegalStateException("Checkout has already been finalized: " + checkoutId);
         }
 
-        Item item = catalogService.findByName(name);
-
-        session.initializeReceipt();
-        settleReceipt(session.getReceipt(), item);
-        return session.getReceipt();
+        return checkout;
     }
 
-    public Receipt checkout() {
-        if (session == null) throw new RuntimeException("Session not found");
-        if (!session.isActive()) throw new RuntimeException("Session has already been finalized");
-        Receipt receiptToReturn = session.getReceipt();
-        session.finalizeSession();
-        return receiptToReturn;
-    }
-
-    private void settleReceipt(Receipt receipt, Item item) {
-        receipt.setItemQuantity(item);
-        BigDecimal totalPrice = priceEngine.calculateTotalPrice(receipt.getItems());
-        receipt.setTotalPrice(totalPrice);
-        receipt.setBundleDiscount(priceEngine.calculateBundleDiscount(receipt.getItems()));
+    private void calculatePrice(Checkout checkout) {
+        checkout.setFinalPrice(priceEngine.calculateTotalPrice(checkout));
+        checkout.setBundleDiscount(priceEngine.calculateBundleDiscount(checkout));
     }
 
 }

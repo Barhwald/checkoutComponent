@@ -1,0 +1,26 @@
+[
+  {
+    "id": "A",
+    "normalPrice": 40,
+    "requiredQuantity": 3,
+    "specialPrice": 30
+  },
+  {
+    "id": "B",
+    "normalPrice": 10,
+    "requiredQuantity": 2,
+    "specialPrice": 7.5
+  },
+  {
+    "id": "C",
+    "normalPrice": 30,
+    "requiredQuantity": 4,
+    "specialPrice": 20
+  },
+  {
+    "id": "D",
+    "normalPrice": 25,
+    "requiredQuantity": 2,
+    "specialPrice": 23.5
+  }
+]

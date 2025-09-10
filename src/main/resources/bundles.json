@@ -1,0 +1,12 @@
+[
+  {
+    "firstItem": "A",
+    "secondItem": "B",
+    "discount": 5
+  },
+  {
+    "firstItem": "C",
+    "secondItem": "D",
+    "discount": 2.5
+  }
+]

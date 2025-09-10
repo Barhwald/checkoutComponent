@@ -1,7 +1,7 @@
 package com.checkout.config;
 
 import com.checkout.domain.BundleOffer;
-import com.checkout.domain.Item;
+import com.checkout.domain.Product;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -16,6 +16,6 @@ import java.util.List;
 @Setter
 
 public class CheckoutConfig {
-    private List<Item> catalogItems = new ArrayList<>();
+    private List<Product> catalogItems = new ArrayList<>();
     private List<BundleOffer> bundleOffers = new ArrayList<>();
 }

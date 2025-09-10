@@ -1,81 +1,80 @@
 package com.checkout.service;
 
 import com.checkout.domain.BundleOffer;
-import com.checkout.domain.Item;
+import com.checkout.domain.Checkout;
+import com.checkout.domain.Product;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
-import java.util.List;
+import java.util.Map;
 
 @Component
 @RequiredArgsConstructor
 public class PriceEngine {
 
     private final BundleService bundleService;
+    private final CatalogService catalogService;
 
-    public BigDecimal calculateTotalPrice(List<Item> items) {
+    public BigDecimal calculateTotalPrice(Checkout checkout) {
         BigDecimal total = BigDecimal.ZERO;
-        total = calculatePriceWithSpecials(total, items);
 
-        BigDecimal discount = calculateBundleDiscount(items);
+        for (Map.Entry<String, Integer> entry : checkout.getItems().entrySet()) {
+            String productId = entry.getKey();
+            int quantity = entry.getValue();
+
+            Product product = catalogService.findById(productId);
+            BigDecimal linePrice = calculateLinePrice(product, quantity);
+
+            total = total.add(linePrice);
+        }
+
+        BigDecimal discount = calculateBundleDiscount(checkout);
         return total.subtract(discount);
     }
 
-    private BigDecimal calculatePriceWithSpecials(BigDecimal total, List<Item> items) {
-        for (Item item : items) {
-            int quantity = item.getQuantity();
-            BigDecimal linePrice;
-
-            if (item.getRequiredQuantity() != null
-                    && item.getRequiredQuantity() > 0
-                    && item.getSpecialPrice() != null
-                    && quantity >= item.getRequiredQuantity()) {
-
-                int fullGroups = quantity / item.getRequiredQuantity();
-                int remainder = quantity % item.getRequiredQuantity();
-
-                BigDecimal specialTotal = item.getSpecialPrice()
-                        .multiply(BigDecimal.valueOf(item.getRequiredQuantity()))
-                        .multiply(BigDecimal.valueOf(fullGroups));
-
-                BigDecimal normalTotal = item.getNormalPrice()
-                        .multiply(BigDecimal.valueOf(remainder));
-
-                linePrice = specialTotal.add(normalTotal);
-
-            } else {
-                linePrice = item.getNormalPrice().multiply(BigDecimal.valueOf(quantity));
-            }
-
-            item.setTotalPrice(linePrice);
-            total = total.add(linePrice);
-        }
-        return total;
-    }
-
-    public BigDecimal calculateBundleDiscount(List<Item> items) {
+    public BigDecimal calculateBundleDiscount(Checkout checkout) {
         BigDecimal discount = BigDecimal.ZERO;
+        Map<String, Integer> items = checkout.getItems();
 
-        for (BundleOffer offer : bundleService.getBundleOffers()) {
-            Item firstItem = findItemByName(items, offer.getFirstItem());
-            Item secondItem = findItemByName(items, offer.getSecondItem());
+        for (Map.Entry<String, Integer> entry : items.entrySet()) {
+            String firstItem = entry.getKey();
+            int firstQty = entry.getValue();
 
-            if (firstItem != null && secondItem != null) {
-                int bundles = Math.min(firstItem.getQuantity(), secondItem.getQuantity());
-                discount = discount.add(
-                        offer.getDiscount().multiply(BigDecimal.valueOf(bundles))
-                );
+            for (BundleOffer offer : bundleService.getBundleOffers()) {
+                if (!offer.getFirstItem().equals(firstItem)) continue;
+
+                String secondItem = offer.getSecondItem();
+                Integer secondQty = items.get(secondItem);
+
+                if (secondQty != null) {
+                    int bundles = Math.min(firstQty, secondQty);
+                    discount = discount.add(offer.getDiscount().multiply(BigDecimal.valueOf(bundles)));
+                }
             }
         }
         return discount;
     }
 
-    private static Item findItemByName(List<Item> items, String name) {
-        return items.stream()
-                .filter(i -> i.getName().equals(name))
-                .findFirst()
-                .orElse(null);
+    private BigDecimal calculateLinePrice(Product product, int quantity) {
+        Integer requiredQty = product.getRequiredQuantity();
+        BigDecimal specialPrice = product.getSpecialPrice();
+        BigDecimal normalPrice = product.getNormalPrice();
+
+        if (requiredQty != null && requiredQty > 0
+                && specialPrice != null
+                && quantity >= requiredQty) {
+
+            int fullGroups = quantity / requiredQty;
+            int remainder = quantity % requiredQty;
+
+            BigDecimal specialTotal = specialPrice.multiply(BigDecimal.valueOf((long) fullGroups * requiredQty));
+            BigDecimal normalTotal = normalPrice.multiply(BigDecimal.valueOf(remainder));
+
+            return specialTotal.add(normalTotal);
+        } else {
+            return normalPrice.multiply(BigDecimal.valueOf(quantity));
+        }
     }
 
 }

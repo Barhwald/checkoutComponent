@@ -1,32 +1,35 @@
 package com.checkout.controller;
 
+import com.checkout.domain.Checkout;
 import com.checkout.domain.ItemDto;
-import com.checkout.domain.Receipt;
 import com.checkout.service.CheckoutService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/v1/items")
+@RequestMapping("/checkouts")
 @RequiredArgsConstructor
 public class CheckoutController {
 
     private final CheckoutService checkoutService;
 
-    @PostMapping(value = "/scan", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Receipt> scanItem(@RequestBody ItemDto itemDto) {
-        Receipt receipt = checkoutService.scanItem(itemDto.getName());
-        return ResponseEntity.ok(receipt);
+    @PostMapping
+    public ResponseEntity<Checkout> initializeCheckout() {
+        Checkout checkout = checkoutService.initializeCheckout();
+        return ResponseEntity.status(HttpStatus.CREATED).body(checkout);
     }
 
-    @GetMapping("/finalize")
-    public ResponseEntity<Receipt> finalizeTransaction() {
-        if (checkoutService.getSession() != null) {
-            return ResponseEntity.ok(checkoutService.checkout());
-        } else {
-            throw new RuntimeException("No active session to finalize");
-        }
+    @PostMapping(value = "/{checkoutId}/items", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Checkout> scanItem(@PathVariable String checkoutId, @RequestBody ItemDto itemDto) {
+        Checkout checkout = checkoutService.scanItem(checkoutId, itemDto);
+        return ResponseEntity.ok(checkout);
+    }
+
+    @GetMapping("/{checkoutId}/finalize")
+    public ResponseEntity<Checkout> finalizeCheckout(@PathVariable String checkoutId) {
+            return ResponseEntity.ok(checkoutService.finalizeCheckout(checkoutId));
     }
 }
