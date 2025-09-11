@@ -57,7 +57,7 @@ Represents a discount applied when two items are bought together.
 | secondItem  | String | ID of the second product |
 | discount  | BigDecimal  | Discount applied per bundle |
 
-Pricing Rules
+### Pricing Rules
 
 Normal Price: Each product has a per-unit price.
 
