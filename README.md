@@ -2,7 +2,7 @@
 
 A Spring Boot service implementing a market checkout system with support for scanned items, special pricing, and bundle discounts. The service exposes a REST API, but has no UI.
 
-Table of Contents
+### Table of Contents:
 
 Domain Objects
 
