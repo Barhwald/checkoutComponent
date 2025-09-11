@@ -1,7 +1,7 @@
 # Checkout Service 3.0
 
-A Spring Boot service implementing a market checkout system with support for scanned items, special pricing, and bundle discounts. The service exposes a REST API, but has no UI.
-
+A Spring Boot service implementing a market checkout system with support for scanned items, special pricing, and bundle discounts. The service exposes a REST API, has no UI.
+The application uses a layered architecture as it is a rather small service. 
 ### Table of Contents:
 
 Domain Objects
