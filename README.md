@@ -17,37 +17,46 @@ Running the Service
 
 Represents a customer's current checkout session.
 
-Field	Type	Description
-id	String	Unique identifier for the checkout session.
-items	Map<String,Integer>	Maps product ID → quantity scanned.
-active	boolean	true if checkout is active, false if finalized.
-finalPrice	BigDecimal	Total price after special prices and bundle discounts.
-bundleDiscount	BigDecimal	Total discount applied due to bundle offers.
+| Field          | Type                 | Description                                           |
+| -------------- | -------------------- | ----------------------------------------------------- |
+| id             | String               | Unique identifier for the checkout session            |
+| items          | Map\<String,Integer> | Maps product ID → quantity scanned                    |
+| active         | boolean              | true if checkout is active, false if finalized        |
+| finalPrice     | BigDecimal           | Total price after special prices and bundle discounts |
+| bundleDiscount | BigDecimal           | Total discount applied due to bundle offers           |
+
 ####  2. Product
 
 Represents an item in the catalog.
 
-Field	Type	Description
-id	String	Product identifier.
-name	String	Human-readable name.
-normalPrice	BigDecimal	Price per unit.
-requiredQuantity	Integer	Minimum quantity for special price (optional).
-specialPrice	BigDecimal	Price for a group of requiredQuantity (optional).
+| Field            | Type       | Description                                      |
+| ---------------- | ---------- | ------------------------------------------------ |
+| id               | String     | Product identifier                               |
+| name             | String     | Human-readable name                              |
+| normalPrice      | BigDecimal | Price per unit                                   |
+| requiredQuantity | Integer    | Minimum quantity for special price (optional)    |
+| specialPrice     | BigDecimal | Price for a group of requiredQuantity (optional) |
+
 ####  3. ItemDto
 
 Data transfer object for scanning an item.
 
-Field	Type	Description
-id	String	Product ID to scan.
-quantity	Integer	Quantity to add (default 1).
+| Field    | Type    | Description                 |
+| -------- | ------- | --------------------------- |
+| id       | String  | Product ID to scan          |
+| quantity | Integer | Quantity to add (default 1) |
+
 ####  4. BundleOffer
 
 Represents a discount applied when two items are bought together.
 
-Field	Type	Description
-firstItem	String	ID of the first product (must be "lower" than second).
-secondItem	String	ID of the second product.
-discount	BigDecimal	Discount applied per bundle.
+
+| Field  | Type | Description |
+| ------------- | ------------- | ------------- |
+| firstItem  | String  | ID of the first product (must be "lower" than second) |
+| secondItem  | String | ID of the second product |
+| discount  | BigDecimal  | Discount applied per bundle |
+
 Pricing Rules
 
 Normal Price: Each product has a per-unit price.
