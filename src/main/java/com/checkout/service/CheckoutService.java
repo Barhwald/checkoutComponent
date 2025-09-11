@@ -16,7 +16,7 @@ public class CheckoutService {
 
     public Checkout initializeCheckout() {
         Checkout checkout = new Checkout();
-        checkoutRepository.getCheckouts().put(checkout.getId(), checkout);
+        checkoutRepository.addCheckout(checkout);
         return checkout;
     }
 
