@@ -17,7 +17,11 @@ class CatalogRepositoryIntegrationTest {
 
     @Test
     void catalogLoadsFromJson_andFindById() {
+
+        //when
         Product a = catalogRepository.findById("A").orElseThrow();
+
+        //then
         assertEquals("A", a.getId());
         assertEquals(0, BigDecimal.valueOf(40).compareTo(a.getNormalPrice()));
         assertEquals(3, a.getRequiredQuantity());

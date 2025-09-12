@@ -22,13 +22,13 @@ public class CheckoutController {
         return ResponseEntity.status(HttpStatus.CREATED).body(checkout);
     }
 
-    @PostMapping(value = "/{checkoutId}/items", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PutMapping(value = "/{checkoutId}/items", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Checkout> scanItem(@PathVariable String checkoutId, @RequestBody ItemDto itemDto) {
         Checkout checkout = checkoutService.scanItem(checkoutId, itemDto);
         return ResponseEntity.ok(checkout);
     }
 
-    @GetMapping("/{checkoutId}/finalize")
+    @PutMapping("/{checkoutId}/finalize")
     public ResponseEntity<Checkout> finalizeCheckout(@PathVariable String checkoutId) {
             return ResponseEntity.ok(checkoutService.finalizeCheckout(checkoutId));
     }

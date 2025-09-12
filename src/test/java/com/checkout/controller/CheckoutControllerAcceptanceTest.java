@@ -28,7 +28,8 @@ class CheckoutControllerAcceptanceTest {
 
     @Test
     void flow_create_scan_finalize_returnsExpectedTotal() throws Exception {
-        // --- Create checkout ---
+
+        // given: Create a new checkout
         String createResponse = mvc.perform(post("/checkouts")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isCreated())
@@ -38,19 +39,21 @@ class CheckoutControllerAcceptanceTest {
                 .getContentAsString();
 
         Checkout created = mapper.readValue(createResponse, Checkout.class);
+
+        // then: Initial state verification
         assertThat(created.getId()).isNotNull();
         assertThat(created.isActive()).isTrue();
         assertThat(created.getItems()).isEmpty();
 
         String checkoutId = created.getId();
 
-        // --- Scan items (4x A) ---
+        // when: Scan items (4x A)
         ItemDto dto = new ItemDto();
         dto.setId("A");
         dto.setQuantity(4);
         String payload = mapper.writeValueAsString(dto);
 
-        String scanResponse = mvc.perform(post("/checkouts/" + checkoutId + "/items")
+        String scanResponse = mvc.perform(put("/checkouts/" + checkoutId + "/items")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(payload))
                 .andExpect(status().isOk())
@@ -60,19 +63,23 @@ class CheckoutControllerAcceptanceTest {
                 .getContentAsString();
 
         Checkout updated = mapper.readValue(scanResponse, Checkout.class);
+
+        // then: Verify scanned items and updated total
         assertThat(updated.getItems()).containsEntry("A", 4);
-        // catalog.json says: A normal 40, special 30 for group of 3 → 30*3 + 40 = 130
         assertThat(updated.getFinalPrice()).isEqualByComparingTo(BigDecimal.valueOf(130));
 
-        // --- Finalize checkout ---
-        String finalizeResponse = mvc.perform(get("/checkouts/" + checkoutId + "/finalize"))
+        // when: Finalize checkout
+        String finalizeResponse = mvc.perform(put("/checkouts/" + checkoutId + "/finalize"))
                 .andExpect(status().isOk())
                 .andReturn()
                 .getResponse()
                 .getContentAsString();
 
         Checkout finalized = mapper.readValue(finalizeResponse, Checkout.class);
+
+        // then: Verify checkout is finalized and total remains correct
         assertThat(finalized.isActive()).isFalse();
         assertThat(finalized.getFinalPrice()).isEqualByComparingTo(BigDecimal.valueOf(130));
     }
+
 }

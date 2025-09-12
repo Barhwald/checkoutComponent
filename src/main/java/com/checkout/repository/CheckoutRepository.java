@@ -2,7 +2,6 @@ package com.checkout.repository;
 
 import com.checkout.domain.Checkout;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
 import java.util.HashMap;

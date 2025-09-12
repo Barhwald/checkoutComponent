@@ -36,4 +36,8 @@ public class CatalogRepository {
                 .filter(item -> item.getId().equalsIgnoreCase(id))
                 .findFirst();
     }
+
+    public List<Product> findAll() {
+        return Collections.unmodifiableList(items);
+    }
 }

@@ -10,7 +10,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(CheckoutController.class)
@@ -24,13 +24,16 @@ class CheckoutNotFoundExceptionTest {
 
     @Test
     void finalizeCheckout_checkoutNotFound_returns400() throws Exception {
-        String invalidId = "DoesNotExist";
 
+        //given
+        String invalidId = "DoesNotExist";
         when(checkoutService.finalizeCheckout(invalidId))
                 .thenThrow(new CheckoutNotFoundException("Checkout not found: " + invalidId));
 
-        mvc.perform(get("/checkouts/" + invalidId + "/finalize")
+        //when & then
+        mvc.perform(put("/checkouts/" + invalidId + "/finalize")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest());
     }
+
 }
